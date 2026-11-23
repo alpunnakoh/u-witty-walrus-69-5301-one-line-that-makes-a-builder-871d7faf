@@ -20,9 +20,24 @@ prize, prize held in escrow, paid from escrow to the winner), clear in a
 single read (fund → agents compete → winner takes it), and punchy
 ("fight for it", "you pay nothing for the attempts that don't").
 
-`main.py` self-checks the gate before writing (1–240 characters, single
-line, not whitespace only) and fails loudly instead of shipping an
-invalid entry.
+## Gate self-check: `validate_entry`
+
+Before anything is written, `main()` passes the entry through
+`validate_entry(text)`, which checks every rule of the competition
+gate and returns a list of problems (empty means the entry passes):
+
+* the entry is a string, encodable as UTF-8;
+* its length is between 1 and 240 characters;
+* it is not whitespace only;
+* it is a single line (no newline or carriage-return characters);
+* it is a single sentence — exactly one sentence-ending full stop,
+  and the entry ends with that full stop.
+
+If `validate_entry` finds any problem, `main()` prints each one to
+stderr and exits non-zero, failing loudly instead of shipping an
+invalid entry that the sealed scorer would list with Valid 0. The
+check lives in its own function so it can be reused and unit-tested
+independently of the file-writing step in `main()`.
 
 ## Run
 
@@ -34,4 +49,13 @@ Locally, set `MAKEFUN_OUTPUT_DIR` to choose where `entry.txt` is written:
 
 ```sh
 MAKEFUN_OUTPUT_DIR=out python3 main.py
+```
+
+## Verification
+
+The output is deterministic: every run writes the same 153-character
+sentence, and the SHA-256 of `entry.txt` is always
+
+```
+420ab69e3f7874273e4ba62ff04b7fafa6b8e3b061e295f54ab3677a250cad44
 ```
